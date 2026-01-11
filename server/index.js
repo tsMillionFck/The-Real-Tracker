@@ -23,6 +23,7 @@ app.use(
       "http://localhost:5174",
       "http://localhost:3000",
       "http://localhost:5177",
+      "https://the-real-tracker-psi.vercel.app"
     ],
     credentials: true,
   })

@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEO-BRUTAL TRACKER v4.4 // SINGLE_FILE</title>
+
+    <!-- React & Babel -->
+    <script
+      src="https://unpkg.com/react@18/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind (Optional fallback) or specific fonts if needed -->
+    <!-- CSS Styles -->
+    <style>
+      /* --- CORE VARIABLES --- */
+      :root {
+        --bg-app: #e0e7ff;
+        --c-black: #000000;
+        --c-white: #ffffff;
+
+        --c-primary: #ffde59; /* Yellow */
+        --c-secondary: #ff5757; /* Red */
+        --c-accent: #00e5ff; /* Cyan */
+        --c-success: #c0ff00; /* Lime */
+        --c-grim: #d0a9f5; /* Lavender */
+
+        --border: 4px solid var(--c-black);
+        --border-thin: 2px solid var(--c-black);
+        --shadow: 8px 8px 0px var(--c-black);
+
+        --font-mono: "Courier New", monospace;
+        --font-display: "Arial Black", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        margin: 0;
+        padding: 40px;
+        background-color: var(--bg-app);
+        background-image: radial-gradient(#000 1px, transparent 1px);
+        background-size: 24px 24px;
+        font-family: var(--font-mono);
+        color: var(--c-black);
+        min-height: 100vh;
+      }
+
+      /* --- LAYOUT --- */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 40px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* --- HEADER --- */
+      header {
+        max-width: 1200px;
+        margin: 0 auto 40px auto;
+        background: var(--c-white);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transform: rotate(-1deg);
+      }
+
+      .brand {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        background: var(--c-accent);
+        padding: 5px 15px;
+        border: var(--border-thin);
+        box-shadow: 4px 4px 0px var(--c-black);
+      }
+
+      /* --- CARDS --- */
+      .brutal-card {
+        background: var(--c-white);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 25px;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      /* --- LOG CARD STYLES --- */
+      .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px solid var(--c-black);
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+      }
+
+      h2 {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        margin: 0;
+        font-size: 1.5rem;
+        line-height: 1;
+      }
+
+      .toggle-btn {
+        background: var(--c-black);
+        color: var(--c-white);
+        border: none;
+        font-family: var(--font-mono);
+        font-weight: bold;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.8rem;
+      }
+
+      .toggle-btn:hover {
+        background: var(--c-accent);
+        color: black;
+      }
+
+      .log-preview {
+        background: #f4f4f4;
+        border: 2px solid black;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0;
+        font-weight: bold;
+      }
+
+      .log-full {
+        display: none;
+        margin-top: 20px;
+        border-top: 2px dashed black;
+        padding-top: 20px;
+      }
+
+      .log-full.open {
+        display: block;
+        animation: slideDown 0.2s ease-out;
+      }
+
+      /* --- GRAPH STYLES --- */
+      .chart-container {
+        position: relative;
+        height: 300px;
+        background: #fff;
+        border: var(--border);
+        margin-bottom: 30px;
+        /* Technical Grid */
+        background-image: linear-gradient(
+            rgba(0, 0, 0, 0.1) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+
+      .chart-legend {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 0.8rem;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border: 2px solid black;
+      }
+
+      .dash-line {
+        width: 20px;
+        height: 3px;
+        background: black;
+        border-bottom: 2px dashed var(--c-primary);
+      }
+
+      /* --- BUTTONS & INPUTS --- */
+      .command-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .action-btn-large {
+        width: 100%;
+        height: 100px;
+        border: 4px solid var(--c-black);
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 6px 6px 0px var(--c-black);
+        transition: all 0.1s;
+      }
+
+      .action-btn-large:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0px 0px 0px;
+      }
+
+      .action-btn-large span {
+        font-size: 0.8rem;
+        font-family: var(--font-mono);
+        margin-top: 5px;
+        opacity: 0.7;
+      }
+
+      .btn-budget {
+        background: var(--c-primary);
+        color: black;
+      }
+
+      .btn-income {
+        background: var(--c-success);
+        color: black;
+      }
+
+      .btn-expense {
+        background: var(--c-secondary);
+        color: white;
+      }
+
+      /* --- MODALS --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-box {
+        background: var(--c-white);
+        border: 4px solid var(--c-black);
+        box-shadow: 15px 15px 0px var(--c-accent);
+        padding: 30px;
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        animation: slideUp 0.2s ease-out;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        background: var(--c-secondary);
+        color: white;
+        border: 3px solid black;
+        width: 40px;
+        height: 40px;
+        font-weight: 900;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        box-shadow: 4px 4px 0px black;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .label {
+        font-weight: 900;
+        display: block;
+        margin-bottom: 8px;
+        background: var(--c-black);
+        color: var(--c-white);
+        padding: 2px 8px;
+        width: fit-content;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 3px solid var(--c-black);
+        background: #f4f4f4;
+        font-family: var(--font-mono);
+        font-weight: bold;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 15px;
+        border: 3px solid var(--c-black);
+        font-family: var(--font-display);
+        font-size: 1rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        background: var(--c-white);
+        box-shadow: 5px 5px 0px var(--c-black);
+        transition: all 0.1s;
+      }
+
+      .btn:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0px 0px 0px black;
+      }
+
+      /* --- RIGHT COL WIDGETS --- */
+      .runway-card {
+        background: var(--c-black);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: var(--border);
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+      }
+
+      .runway-val {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        line-height: 1;
+        color: var(--c-success);
+      }
+
+      .life-card {
+        background: #333;
+        color: white;
+        margin-bottom: 30px;
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 25px;
+      }
+
+      .life-card.freedom {
+        background: var(--c-success) !important;
+        color: black !important;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-box {
+        border: 3px solid var(--c-black);
+        padding: 15px;
+        text-align: center;
+        background: #e0e0e0;
+        box-shadow: 4px 4px 0px var(--c-black);
+      }
+
+      .stat-val {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        margin-top: 5px;
+      }
+
+      /* --- TABLE --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        border: 3px solid black;
+      }
+
+      th {
+        background: var(--c-black);
+        color: var(--c-white);
+        padding: 12px;
+        text-align: left;
+        font-family: var(--font-display);
+      }
+
+      td {
+        border-bottom: 2px solid black;
+        padding: 12px;
+        font-weight: bold;
+      }
+
+      .tag {
+        padding: 4px 8px;
+        border: 2px solid black;
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+
+      .tag-inc {
+        background: var(--c-success);
+      }
+
+      .tag-exp {
+        background: var(--c-secondary);
+        color: white;
+      }
+
+      /* --- ANIMATIONS --- */
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- RESPONSIVE / MOBILE DESIGN --- */
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        /* Layout Adjustments */
+        body {
+          padding: 15px;
+          background-size: 16px 16px;
+        }
+
+        .container {
+          gap: 20px;
+        }
+
+        /* Header Optimization */
+        header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+          padding: 15px;
+          transform: rotate(0deg); /* Reset rotation for cleaner mobile view */
+          margin-bottom: 25px;
+        }
+
+        .brand {
+          font-size: 1.4rem;
+          width: 100%;
+          text-align: center;
+        }
+
+        header > div {
+          flex-direction: column;
+          width: 100%;
+          gap: 10px !important;
+        }
+
+        /* Command Grid & Buttons */
+        .command-grid {
+          gap: 15px;
+        }
+
+        .action-btn-large {
+          height: 80px;
+          font-size: 1.2rem;
+        }
+
+        .action-btn-large span {
+          font-size: 0.7rem;
+        }
+
+        .brutal-card {
+          padding: 15px;
+          margin-bottom: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .stat-box {
+          padding: 10px;
+        }
+
+        .stat-val {
+          font-size: 1.2rem;
+        }
+
+        /* Runway & Life Components */
+        .runway-card {
+          flex-direction: column;
+          text-align: center;
+          gap: 10px;
+        }
+
+        .runway-val {
+          font-size: 2rem;
+        }
+
+        /* Table Adjustments */
+        th,
+        td {
+          padding: 8px;
+          font-size: 0.8rem;
+        }
+
+        .tag {
+          padding: 2px 6px;
+          font-size: 0.7rem;
+        }
+
+        /* Modals */
+        .modal-box {
+          width: 95%;
+          padding: 20px;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .close-modal {
+          top: -15px;
+          right: -10px;
+          width: 35px;
+          height: 35px;
+        }
+
+        /* Auth Pages */
+        .auth-card {
+          padding: 25px;
+        }
+
+        .auth-title {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* Small Landscape & Foldable support */
+      @media (max-width: 400px) {
+        .brand {
+          font-size: 1.2rem;
+        }
+
+        h2 {
+          font-size: 1.2rem;
+        }
+      }
+
+      /* --- AUTH PAGES --- */
+      .auth-container {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .auth-card {
+        background: var(--c-white);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        animation: slideUp 0.3s ease-out;
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 4px solid var(--c-black);
+      }
+
+      .auth-header .brand {
+        display: inline-block;
+      }
+
+      .auth-title {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        text-align: center;
+        margin-bottom: 25px;
+        background: var(--c-black);
+        color: var(--c-white);
+        padding: 10px;
+      }
+
+      .auth-error {
+        background: var(--c-secondary);
+        color: white;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 3px solid var(--c-black);
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .auth-error-warning {
+        background: var(--c-primary);
+        color: black;
+      }
+
+      .loading-dots::after {
+        content: "";
+        animation: dots 1.5s infinite;
+      }
+
+      @keyframes dots {
+        0%,
+        20% {
+          content: ".";
+        }
+        40% {
+          content: "..";
+        }
+        60%,
+        100% {
+          content: "...";
+        }
+      }
+
+      .btn-auth {
+        background: var(--c-accent);
+        color: black;
+        margin-top: 10px;
+      }
+
+      .btn-auth:hover {
+        background: var(--c-primary);
+      }
+
+      .btn-auth:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn-register {
+        background: var(--c-success);
+      }
+
+      .auth-footer {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px dashed var(--c-black);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        font-weight: bold;
+      }
+
+      .auth-link {
+        background: var(--c-black);
+        color: var(--c-white);
+        border: none;
+        padding: 5px 12px;
+        font-family: var(--font-mono);
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      .auth-link:hover {
+        background: var(--c-accent);
+        color: var(--c-black);
+      }
+
+      .auth-docs-link {
+        text-align: center;
+        margin-top: 15px;
+      }
+
+      /* --- NAV BUTTONS --- */
+      .nav-btn {
+        background: var(--c-black);
+        color: white;
+        border: 3px solid black;
+        padding: 5px 12px;
+        font-family: var(--font-mono);
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 black;
+        transition: all 0.1s;
+      }
+
+      .nav-btn:hover {
+        background: var(--c-accent);
+        color: black;
+      }
+
+      .nav-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 black;
+      }
+
+      .nav-btn-logout {
+        background: var(--c-secondary);
+      }
+
+      .nav-btn-logout:hover {
+        background: #ff3333;
+        color: white;
+      }
+
+      /* --- DOCS PAGE --- */
+      .docs-container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .docs-header {
+        background: var(--c-white);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+      }
+
+      .docs-back-btn {
+        width: auto;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+
+      .docs-content {
+        background: var(--c-white);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        padding: 40px;
+      }
+
+      .docs-hero {
+        text-align: center;
+        padding: 30px;
+        background: var(--c-black);
+        color: white;
+        margin-bottom: 40px;
+        border: var(--border);
+      }
+
+      .docs-hero h1 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--c-accent);
+      }
+
+      .docs-hero p {
+        opacity: 0.7;
+      }
+
+      .docs-section {
+        margin-bottom: 40px;
+      }
+
+      .docs-section h2 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: var(--c-primary);
+        border: 3px solid black;
+        display: inline-block;
+      }
+
+      .docs-section p {
+        line-height: 1.8;
+        margin-bottom: 15px;
+      }
+
+      .docs-card {
+        background: #f4f4f4;
+        border: 3px solid black;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 4px 4px 0 black;
+      }
+
+      .docs-card h3 {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        margin-bottom: 10px;
+      }
+
+      .docs-card ul {
+        margin-top: 10px;
+        padding-left: 20px;
+      }
+
+      .docs-card li {
+        margin-bottom: 8px;
+      }
+
+      .docs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 600px) {
+        .docs-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .docs-metric {
+        background: var(--c-accent);
+        border: 3px solid black;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .docs-metric-title {
+        font-family: var(--font-display);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+      }
+
+      .docs-legend {
+        background: #f4f4f4;
+        border: 3px solid black;
+        padding: 20px;
+      }
+
+      .docs-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .docs-legend-item:last-child {
+        margin-bottom: 0;
+      }
+
+      code {
+        background: var(--c-black);
+        color: var(--c-accent);
+        padding: 2px 8px;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+      }
+
+      .docs-footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 4px solid black;
+        text-align: center;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Application Logic -->
+    <script type="text/babel">
+      // Destructure React hooks
+      const {
+        useState,
+        useEffect,
+        useRef,
+        useCallback,
+        createContext,
+        useContext,
+      } = React;
+
+      // Environment Fallback
+      const API_URL = "http://localhost:3000/api";
+
+      // --- AUTH CONTEXT ---
+      const AuthContext = createContext();
+
+      function AuthProvider({ children }) {
+        const [user, setUser] = useState(null);
+        const [token, setToken] = useState(localStorage.getItem("token"));
+        const [loading, setLoading] = useState(true);
+
+        // Check if user is authenticated on mount
+        useEffect(() => {
+          const checkAuth = async () => {
+            const savedToken = localStorage.getItem("token");
+            if (savedToken) {
+              try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                  headers: {
+                    Authorization: `Bearer ${savedToken}`,
+                  },
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  setUser(data.user);
+                  setToken(savedToken);
+                } else {
+                  // Token invalid, clear it
+                  localStorage.removeItem("token");
+                  setToken(null);
+                }
+              } catch (error) {
+                console.error("Auth check failed:", error);
+                localStorage.removeItem("token");
+                setToken(null);
+              }
+            }
+            setLoading(false);
+          };
+
+          checkAuth();
+        }, []);
+
+        const register = async (email, password, name) => {
+          const response = await fetch(`${API_URL}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, name }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Registration failed");
+          }
+
+          localStorage.setItem("token", data.token);
+          setToken(data.token);
+          setUser(data.user);
+          return data;
+        };
+
+        const login = async (email, password) => {
+          const response = await fetch(`${API_URL}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Login failed");
+          }
+
+          localStorage.setItem("token", data.token);
+          setToken(data.token);
+          setUser(data.user);
+          return data;
+        };
+
+        const logout = () => {
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+        };
+
+        const value = {
+          user,
+          token,
+          loading,
+          isAuthenticated: !!token,
+          register,
+          login,
+          logout,
+        };
+
+        return (
+          <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+        );
+      }
+
+      function useAuth() {
+        const context = useContext(AuthContext);
+        if (!context) {
+          throw new Error("useAuth must be used within an AuthProvider");
+        }
+        return context;
+      }
+
+      // --- TRACKER CONTEXT ---
+      const TrackerContext = createContext();
+      const STORAGE_KEY = "neoTrackerV44";
+
+      function TrackerProvider({ children }) {
+        const { token, isAuthenticated } = useAuth();
+        const [state, setState] = useState({
+          budget: 0,
+          wage: 0,
+          transactions: [],
+        });
+        const [loading, setLoading] = useState(false);
+        const [syncing, setSyncing] = useState(false);
+
+        // Load data from backend when authenticated
+        const loadFromBackend = useCallback(async () => {
+          if (!token) return;
+
+          setLoading(true);
+          try {
+            const response = await fetch(`${API_URL}/tracker`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              setState({
+                budget: data.budget || 0,
+                wage: data.wage || 0,
+                transactions: data.transactions || [],
+              });
+            }
+          } catch (error) {
+            console.error("Failed to load tracker data:", error);
+          } finally {
+            setLoading(false);
+          }
+        }, [token]);
+
+        // Save data to backend
+        const saveToBackend = useCallback(
+          async (newState) => {
+            if (!token) return;
+
+            setSyncing(true);
+            try {
+              await fetch(`${API_URL}/tracker`, {
+                method: "PUT",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newState),
+              });
+            } catch (error) {
+              console.error("Failed to save tracker data:", error);
+            } finally {
+              setSyncing(false);
+            }
+          },
+          [token]
+        );
+
+        // Load from localStorage (fallback) or backend
+        useEffect(() => {
+          if (isAuthenticated && token) {
+            loadFromBackend();
+          } else {
+            // Load from localStorage when not authenticated
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+              try {
+                setState(JSON.parse(saved));
+              } catch (e) {
+                console.error("Failed to parse saved state:", e);
+              }
+            }
+          }
+        }, [isAuthenticated, token, loadFromBackend]);
+
+        // Save to localStorage when not authenticated
+        useEffect(() => {
+          if (!isAuthenticated) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          }
+        }, [state, isAuthenticated]);
+
+        const setBudget = (budget) => {
+          const newBudget = parseFloat(budget) || 0;
+          setState((prev) => {
+            const newState = { ...prev, budget: newBudget };
+            if (isAuthenticated) saveToBackend(newState);
+            return newState;
+          });
+        };
+
+        const setWage = (wage) => {
+          const newWage = parseFloat(wage) || 0;
+          setState((prev) => {
+            const newState = { ...prev, wage: newWage };
+            if (isAuthenticated) saveToBackend(newState);
+            return newState;
+          });
+        };
+
+        const addTransaction = (transaction) => {
+          setState((prev) => {
+            const newTransaction = {
+              ...transaction,
+              id: Date.now(),
+              _id: Date.now().toString(), // For backend compatibility
+            };
+            const newState = {
+              ...prev,
+              transactions: [...prev.transactions, newTransaction],
+            };
+            if (isAuthenticated) saveToBackend(newState);
+            return newState;
+          });
+        };
+
+        const deleteTransaction = (id) => {
+          setState((prev) => {
+            const newState = {
+              ...prev,
+              transactions: prev.transactions.filter(
+                (t) =>
+                  t.id !== id &&
+                  t._id !== id &&
+                  t._id?.toString() !== id?.toString()
+              ),
+            };
+            if (isAuthenticated) saveToBackend(newState);
+            return newState;
+          });
+        };
+
+        // Computed values
+        const totalIncome = state.transactions
+          .filter((t) => t.type === "income")
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const totalExpense = state.transactions
+          .filter((t) => t.type === "expense")
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const balance = totalIncome - totalExpense;
+
+        // Calculate runway days
+        const runwayDays = (() => {
+          if (state.budget > 0 && balance > 0) {
+            const dailyBurn = state.budget / 30;
+            return Math.floor(balance / dailyBurn);
+          }
+          return balance <= 0 ? 0 : Infinity;
+        })();
+
+        // Calculate life hours impact
+        const lifeHoursImpact = (() => {
+          if (state.wage > 0) {
+            const net = totalExpense - totalIncome;
+            return net / state.wage;
+          }
+          return 0;
+        })();
+
+        // Graph data
+        const getGraphData = () => {
+          let incHistory = [0];
+          let expHistory = [0];
+          let runInc = 0;
+          let runExp = 0;
+
+          state.transactions.forEach((t) => {
+            if (t.type === "income") {
+              runInc += t.amount;
+            } else {
+              runExp += t.amount;
+            }
+            incHistory.push(runInc);
+            expHistory.push(runExp);
+          });
+
+          return { incHistory, expHistory };
+        };
+
+        // Clear local data (for logout)
+        const clearData = () => {
+          setState({ budget: 0, wage: 0, transactions: [] });
+        };
+
+        const value = {
+          ...state,
+          loading,
+          syncing,
+          setBudget,
+          setWage,
+          addTransaction,
+          deleteTransaction,
+          totalIncome,
+          totalExpense,
+          balance,
+          runwayDays,
+          lifeHoursImpact,
+          getGraphData,
+          clearData,
+          refresh: loadFromBackend,
+        };
+
+        return (
+          <TrackerContext.Provider value={value}>
+            {children}
+          </TrackerContext.Provider>
+        );
+      }
+
+      function useTracker() {
+        const context = useContext(TrackerContext);
+        if (!context) {
+          throw new Error("useTracker must be used within a TrackerProvider");
+        }
+        return context;
+      }
+
+      // --- COMPONENTS ---
+      function Header() {
+        return (
+          <header>
+            <div className="brand">EXPENSE_TERMINAL</div>
+            <div style={{ fontWeight: "bold" }}>v4.4 // LIMIT_FLUX</div>
+          </header>
+        );
+      }
+
+      function Modal({ isOpen, onClose, children }) {
+        if (!isOpen) return null;
+
+        return (
+          <div
+            className={`modal-overlay ${isOpen ? "active" : ""}`}
+            onClick={onClose}
+          >
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+              <button className="close-modal" onClick={onClose}>
+                X
+              </button>
+              {children}
+            </div>
+          </div>
+        );
+      }
+
+      function StatsGrid() {
+        const { totalIncome, totalExpense, balance } = useTracker();
+
+        return (
+          <div className="stats-grid">
+            <div
+              className="stat-box"
+              style={{ background: "var(--c-success)" }}
+            >
+              <div style={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                TOTAL IN
+              </div>
+              <div className="stat-val">+${totalIncome}</div>
+            </div>
+            <div
+              className="stat-box"
+              style={{ background: "var(--c-secondary)", color: "white" }}
+            >
+              <div style={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                TOTAL OUT
+              </div>
+              <div className="stat-val">-${totalExpense}</div>
+            </div>
+            <div className="stat-box" style={{ background: "var(--c-accent)" }}>
+              <div style={{ fontSize: "0.7rem", fontWeight: "bold" }}>NET</div>
+              <div className="stat-val">${balance}</div>
+            </div>
+          </div>
+        );
+      }
+
+      function CommandPanel({
+        onOpenBudget,
+        onOpenWage,
+        onOpenIncome,
+        onOpenExpense,
+      }) {
+        const { budget } = useTracker();
+
+        return (
+          <section className="command-grid">
+            {/* Budget Card */}
+            <div
+              className="brutal-card"
+              style={{
+                padding: 0,
+                overflow: "hidden",
+                borderBottomWidth: "8px",
+              }}
+            >
+              <div
+                style={{
+                  background: "black",
+                  color: "white",
+                  padding: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                SYSTEM_LIMITS
+              </div>
+              <div style={{ padding: "20px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "15px",
+                  }}
+                >
+                  <span>MONTHLY CAP:</span>
+                  <span style={{ fontWeight: 900 }}>${budget.toFixed(2)}</span>
+                </div>
+                <button
+                  className="action-btn-large btn-budget"
+                  onClick={onOpenBudget}
+                >
+                  EDIT BUDGET <span>[ SET_CAP ]</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Wage Card */}
+            <div
+              className="brutal-card"
+              style={{
+                padding: "15px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ fontWeight: "bold" }}>HOURLY_WAGE:</span>
+              <button
+                className="btn"
+                style={{
+                  width: "auto",
+                  padding: "5px 10px",
+                  fontSize: "0.8rem",
+                }}
+                onClick={onOpenWage}
+              >
+                SET_RATE
+              </button>
+            </div>
+
+            {/* Operations Card */}
+            <div
+              className="brutal-card"
+              style={{ padding: 0, borderBottomWidth: "8px" }}
+            >
+              <div
+                style={{
+                  background: "black",
+                  color: "white",
+                  padding: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                OPERATIONS
+              </div>
+              <div style={{ padding: "20px", display: "grid", gap: "20px" }}>
+                <button
+                  className="action-btn-large btn-income"
+                  onClick={onOpenIncome}
+                >
+                  + INJECT INCOME <span>[ REVENUE_STREAM ]</span>
+                </button>
+                <button
+                  className="action-btn-large btn-expense"
+                  onClick={onOpenExpense}
+                >
+                  - EJECT EXPENSE <span>[ COST_CENTER ]</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      function MetricsPanel() {
+        const { runwayDays, lifeHoursImpact } = useTracker();
+
+        // Determine runway color
+        const getRunwayColor = () => {
+          if (runwayDays === Infinity) return "white";
+          if (runwayDays > 30) return "var(--c-success)";
+          if (runwayDays > 7) return "var(--c-primary)";
+          return "var(--c-secondary)";
+        };
+
+        // Determine if in "freedom" mode (net positive life impact)
+        const isFreedom = lifeHoursImpact < 0;
+
+        return (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "30px",
+              marginTop: "30px",
+            }}
+          >
+            {/* Runway Card */}
+            <div className="runway-card">
+              <div>
+                <span
+                  style={{
+                    fontSize: "0.8rem",
+                    fontWeight: "bold",
+                    color: "#888",
+                  }}
+                >
+                  EST. RUNWAY
+                </span>
+                <div className="runway-val" style={{ color: getRunwayColor() }}>
+                  {runwayDays === Infinity ? "∞" : runwayDays}
+                </div>
+              </div>
+              <div
+                style={{ textAlign: "right", fontSize: "0.8rem", opacity: 0.8 }}
+              >
+                DAYS LEFT
+                <br />
+                OF FUNDS
+              </div>
+            </div>
+
+            {/* Life Card */}
+            <div className={`life-card ${isFreedom ? "freedom" : ""}`}>
+              <div
+                style={{ fontSize: "0.8rem", fontWeight: "bold", opacity: 0.8 }}
+              >
+                HOURS IMPACT
+              </div>
+              <div className="life-val">
+                {lifeHoursImpact >= 0 ? "+" : ""}
+                {Math.abs(lifeHoursImpact).toFixed(1)}
+              </div>
+              <div style={{ fontSize: "0.8rem", fontWeight: "bold" }}>
+                NET LIFE COST
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function FluxChart() {
+        const canvasRef = useRef(null);
+        const { budget, getGraphData } = useTracker();
+
+        useEffect(() => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+
+          const ctx = canvas.getContext("2d");
+          const rect = canvas.getBoundingClientRect();
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+
+          const { incHistory, expHistory } = getGraphData();
+
+          if (incHistory.length < 2) {
+            // Clear and show placeholder
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#999";
+            ctx.font = "bold 14px Courier New";
+            ctx.textAlign = "center";
+            ctx.fillText(
+              "ADD TRANSACTIONS TO VIEW GRAPH",
+              canvas.width / 2,
+              canvas.height / 2
+            );
+            return;
+          }
+
+          const budgetVal = budget || 0;
+          const maxVal = Math.max(...incHistory, ...expHistory, budgetVal);
+          const minVal = 0;
+          const range = maxVal - minVal || 1;
+          const pad = 30;
+
+          const getY = (val) => {
+            return (
+              canvas.height -
+              pad -
+              ((val - minVal) / range) * (canvas.height - pad * 2)
+            );
+          };
+
+          // Clear canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw budget line (Yellow Dashed)
+          if (budgetVal > 0) {
+            const yBudget = getY(budgetVal);
+            ctx.beginPath();
+            ctx.strokeStyle = "#FFDE59";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.moveTo(0, yBudget);
+            ctx.lineTo(canvas.width, yBudget);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Label
+            ctx.fillStyle = "#000";
+            ctx.font = "bold 10px Courier New";
+            ctx.textAlign = "left";
+            ctx.fillText(`CAP: $${budgetVal}`, 5, yBudget - 5);
+          }
+
+          // Draw data lines
+          const drawLine = (data, color) => {
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = color;
+            ctx.lineJoin = "round";
+
+            data.forEach((val, i) => {
+              const x = (i / (data.length - 1)) * canvas.width;
+              const y = getY(val);
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            });
+            ctx.stroke();
+          };
+
+          drawLine(incHistory, "#C0FF00"); // Green Income
+          drawLine(expHistory, "#FF5757"); // Red Expense
+        }, [budget, getGraphData]);
+
+        return (
+          <div className="brutal-card">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "15px",
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: "1.2rem" }}>
+                LIMIT_FLUX_GRAPH
+              </h2>
+              <div className="chart-legend">
+                <div className="legend-item">
+                  <div
+                    className="dot"
+                    style={{ background: "var(--c-success)" }}
+                  ></div>{" "}
+                  IN
+                </div>
+                <div className="legend-item">
+                  <div
+                    className="dot"
+                    style={{ background: "var(--c-secondary)" }}
+                  ></div>{" "}
+                  OUT
+                </div>
+                <div className="legend-item">
+                  <div
+                    className="dot"
+                    style={{ background: "var(--c-primary)" }}
+                  ></div>{" "}
+                  CAP
+                </div>
+              </div>
+            </div>
+            <div className="chart-container">
+              <canvas
+                ref={canvasRef}
+                style={{ width: "100%", height: "100%" }}
+              ></canvas>
+            </div>
+          </div>
+        );
+      }
+
+      function TransactionLogs() {
+        const { transactions, deleteTransaction } = useTracker();
+        const [isExpanded, setIsExpanded] = useState(false);
+
+        const reversedTransactions = [...transactions].reverse();
+        const latestTransaction = reversedTransactions[0];
+
+        return (
+          <div className="brutal-card">
+            <div className="log-header">
+              <h2>RAW_LOGS</h2>
+              <button
+                className="toggle-btn"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded ? "[ COLLAPSE - ]" : "[ EXPAND HISTORY + ]"}
+              </button>
+            </div>
+
+            <div id="logPreviewContainer">
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  marginBottom: "5px",
+                  opacity: 0.6,
+                }}
+              >
+                MOST RECENT ACTIVITY:
+              </div>
+              <div className="log-preview">
+                {latestTransaction ? (
+                  <>
+                    <span>{latestTransaction.desc.toUpperCase()}</span>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          background:
+                            latestTransaction.type === "income"
+                              ? "var(--c-success)"
+                              : "var(--c-secondary)",
+                          color:
+                            latestTransaction.type === "income"
+                              ? "black"
+                              : "white",
+                          padding: "2px 5px",
+                          border: "1px solid black",
+                          fontSize: "0.7rem",
+                        }}
+                      >
+                        {latestTransaction.type.toUpperCase()}
+                      </span>
+                      <span>${latestTransaction.amount.toFixed(2)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <span>NO DATA AVAILABLE</span>
+                )}
+              </div>
+            </div>
+
+            <div className={`log-full ${isExpanded ? "open" : ""}`}>
+              <div style={{ overflowX: "auto" }}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ITEM</th>
+                      <th>$$$</th>
+                      <th>TYPE</th>
+                      <th>X</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reversedTransactions.map((tx) => (
+                      <tr key={tx.id}>
+                        <td>{tx.desc.toUpperCase()}</td>
+                        <td>${tx.amount.toFixed(2)}</td>
+                        <td>
+                          <span
+                            className={`tag ${
+                              tx.type === "income" ? "tag-inc" : "tag-exp"
+                            }`}
+                          >
+                            {tx.type}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => deleteTransaction(tx.id)}
+                            style={{
+                              background: "black",
+                              color: "white",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: "5px 10px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            X
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {reversedTransactions.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan="4"
+                          style={{ textAlign: "center", opacity: 0.5 }}
+                        >
+                          NO TRANSACTIONS RECORDED
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function BudgetModal({ isOpen, onClose }) {
+        const { budget, setBudget } = useTracker();
+        const [value, setValue] = useState("");
+
+        useEffect(() => {
+          if (isOpen) {
+            setValue(budget || "");
+          }
+        }, [isOpen, budget]);
+
+        const handleSubmit = () => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            setBudget(numValue);
+            onClose();
+          }
+        };
+
+        return (
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "20px",
+                fontFamily: "var(--font-display)",
+                fontSize: "1.5rem",
+              }}
+            >
+              SET BUDGET CAP
+            </div>
+            <div className="input-group">
+              <label className="label">MONTHLY LIMIT ($)</label>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="0.00"
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              />
+            </div>
+            <button className="btn btn-budget" onClick={handleSubmit}>
+              CONFIRM_LIMIT
+            </button>
+          </Modal>
+        );
+      }
+
+      function WageModal({ isOpen, onClose }) {
+        const { wage, setWage } = useTracker();
+        const [value, setValue] = useState("");
+
+        useEffect(() => {
+          if (isOpen) {
+            setValue(wage || "");
+          }
+        }, [isOpen, wage]);
+
+        const handleSubmit = () => {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            setWage(numValue);
+            onClose();
+          }
+        };
+
+        return (
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "20px",
+                fontFamily: "var(--font-display)",
+                fontSize: "1.5rem",
+              }}
+            >
+              SET HOURLY VALUE
+            </div>
+            <div className="input-group">
+              <label className="label">HOURLY WAGE ($)</label>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="0.00"
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              />
+            </div>
+            <button
+              className="btn"
+              style={{ background: "var(--c-grim)" }}
+              onClick={handleSubmit}
+            >
+              CONFIRM_RATE
+            </button>
+          </Modal>
+        );
+      }
+
+      function TransactionModal({ isOpen, onClose, type }) {
+        const { addTransaction } = useTracker();
+        const [desc, setDesc] = useState("");
+        const [amount, setAmount] = useState("");
+
+        useEffect(() => {
+          if (isOpen) {
+            setDesc("");
+            setAmount("");
+          }
+        }, [isOpen]);
+
+        const isIncome = type === "income";
+
+        const handleSubmit = () => {
+          const numAmount = parseFloat(amount);
+          if (!desc.trim() || isNaN(numAmount) || numAmount <= 0) {
+            alert("INVALID DATA");
+            return;
+          }
+
+          addTransaction({
+            desc: desc.trim(),
+            amount: numAmount,
+            type,
+          });
+
+          onClose();
+        };
+
+        const titleStyle = {
+          textAlign: "center",
+          marginBottom: "20px",
+          fontFamily: "var(--font-display)",
+          fontSize: "1.5rem",
+          padding: "10px",
+          border: "3px solid black",
+          background: isIncome ? "var(--c-success)" : "var(--c-secondary)",
+          color: isIncome ? "black" : "white",
+        };
+
+        const btnStyle = {
+          background: isIncome ? "var(--c-success)" : "var(--c-secondary)",
+          color: isIncome ? "black" : "white",
+        };
+
+        return (
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <div style={titleStyle}>
+              {isIncome ? "INJECT INCOME" : "EJECT EXPENSE"}
+            </div>
+            <div className="input-group">
+              <label className="label">DESCRIPTION</label>
+              <input
+                type="text"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder="ITEM NAME"
+              />
+            </div>
+            <div className="input-group">
+              <label className="label">AMOUNT ($)</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              />
+            </div>
+            <button className="btn" style={btnStyle} onClick={handleSubmit}>
+              EXECUTE
+            </button>
+          </Modal>
+        );
+      }
+
+      function LoginPage({ onSwitchToRegister, onOpenDocs }) {
+        const { login } = useAuth();
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [error, setError] = useState("");
+        const [errorType, setErrorType] = useState(""); // 'network', 'credentials', 'notfound', 'timeout'
+        const [loading, setLoading] = useState(false);
+        const timeoutRef = useRef(null);
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setError("");
+          setErrorType("");
+          setLoading(true);
+
+          // Set timeout for slow network (10 seconds)
+          timeoutRef.current = setTimeout(() => {
+            if (loading) {
+              setError(
+                "Connection taking too long. Check your network and try again."
+              );
+              setErrorType("timeout");
+              setLoading(false);
+            }
+          }, 10000);
+
+          try {
+            await login(email, password);
+            // Clear timeout on success
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+          } catch (err) {
+            // Clear timeout on error
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+
+            const errorMsg = err.message.toLowerCase();
+
+            // Determine error type for specific feedback
+            if (
+              errorMsg.includes("user not found") ||
+              errorMsg.includes("no user")
+            ) {
+              setError("User not found. Please check your email or register.");
+              setErrorType("notfound");
+            } else if (
+              errorMsg.includes("invalid credentials") ||
+              errorMsg.includes("wrong password")
+            ) {
+              setError(
+                "Invalid credentials. Please check your email and password."
+              );
+              setErrorType("credentials");
+            } else if (
+              errorMsg.includes("network") ||
+              errorMsg.includes("failed to fetch")
+            ) {
+              setError("Network error. Please check your connection.");
+              setErrorType("network");
+            } else {
+              setError(err.message || "Login failed. Please try again.");
+              setErrorType("general");
+            }
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        const getErrorIcon = () => {
+          switch (errorType) {
+            case "timeout":
+              return "⏱";
+            case "network":
+              return "📡";
+            case "notfound":
+              return "👤";
+            case "credentials":
+              return "🔐";
+            default:
+              return "⚠";
+          }
+        };
+
+        return (
+          <div className="auth-container">
+            <div className="auth-card">
+              <div className="auth-header">
+                <div className="brand">EXPENSE_TERMINAL</div>
+                <div style={{ marginTop: "10px", opacity: 0.7 }}>
+                  v4.4 // LIMIT_FLUX
+                </div>
+              </div>
+
+              <div className="auth-title">ACCESS_SYSTEM</div>
+
+              {error && (
+                <div
+                  className={`auth-error ${
+                    errorType === "timeout" || errorType === "network"
+                      ? "auth-error-warning"
+                      : ""
+                  }`}
+                >
+                  {getErrorIcon()} {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div className="input-group">
+                  <label className="label">EMAIL</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="user@domain.com"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="label">PASSWORD</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-auth"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="loading-dots">AUTHENTICATING</span>
+                    </>
+                  ) : (
+                    "LOGIN [ ENTER ]"
+                  )}
+                </button>
+              </form>
+
+              <div className="auth-footer">
+                <span>NO ACCOUNT?</span>
+                <button
+                  className="auth-link"
+                  onClick={onSwitchToRegister}
+                  disabled={loading}
+                >
+                  REGISTER_NEW
+                </button>
+              </div>
+
+              {onOpenDocs && (
+                <div className="auth-docs-link">
+                  <button
+                    className="auth-link"
+                    onClick={onOpenDocs}
+                    disabled={loading}
+                  >
+                    VIEW DOCS
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      function RegisterPage({ onSwitchToLogin, onOpenDocs }) {
+        const { register } = useAuth();
+        const [name, setName] = useState("");
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [confirmPassword, setConfirmPassword] = useState("");
+        const [error, setError] = useState("");
+        const [loading, setLoading] = useState(false);
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setError("");
+
+          if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+          }
+
+          if (password.length < 6) {
+            setError("Password must be at least 6 characters");
+            return;
+          }
+
+          setLoading(true);
+
+          try {
+            await register(email, password, name);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        return (
+          <div className="auth-container">
+            <div className="auth-card">
+              <div className="auth-header">
+                <div className="brand">EXPENSE_TERMINAL</div>
+                <div style={{ marginTop: "10px", opacity: 0.7 }}>
+                  v4.4 // LIMIT_FLUX
+                </div>
+              </div>
+
+              <div className="auth-title">CREATE_ACCOUNT</div>
+
+              {error && <div className="auth-error">⚠ {error}</div>}
+
+              <form onSubmit={handleSubmit}>
+                <div className="input-group">
+                  <label className="label">NAME (OPTIONAL)</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="YOUR ALIAS"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="label">EMAIL</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="user@domain.com"
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="label">PASSWORD</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="MIN 6 CHARACTERS"
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="label">CONFIRM PASSWORD</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="REPEAT PASSWORD"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-auth btn-register"
+                  disabled={loading}
+                >
+                  {loading ? "CREATING..." : "REGISTER [ CREATE ]"}
+                </button>
+              </form>
+
+              <div className="auth-footer">
+                <span>HAVE ACCOUNT?</span>
+                <button className="auth-link" onClick={onSwitchToLogin}>
+                  LOGIN_EXISTING
+                </button>
+              </div>
+
+              {onOpenDocs && (
+                <div className="auth-docs-link">
+                  <button className="auth-link" onClick={onOpenDocs}>
+                    VIEW DOCS
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      function DocsPage({ onBack }) {
+        return (
+          <div className="docs-container">
+            <header className="docs-header">
+              <div className="brand">EXPENSE_TERMINAL</div>
+              <button className="btn docs-back-btn" onClick={onBack}>
+                ← BACK TO APP
+              </button>
+            </header>
+
+            <div className="docs-content">
+              <div className="docs-hero">
+                <h1>SYSTEM_DOCUMENTATION</h1>
+                <p>v4.4 // LIMIT_FLUX // USER MANUAL</p>
+              </div>
+
+              <section className="docs-section">
+                <h2>[ OVERVIEW ]</h2>
+                <p>
+                  NEO-BRUTAL TRACKER is a personal finance terminal designed to
+                  help you track income, expenses, and visualize your financial
+                  runway. Built with a neo-brutalist aesthetic for maximum
+                  clarity and impact.
+                </p>
+              </section>
+
+              <section className="docs-section">
+                <h2>[ GETTING STARTED ]</h2>
+                <div className="docs-card">
+                  <h3>1. SET YOUR BUDGET CAP</h3>
+                  <p>
+                    Click <strong>EDIT BUDGET</strong> to set your monthly
+                    spending limit. This value is used to calculate your
+                    financial runway and appears as a dashed line on the flux
+                    graph.
+                  </p>
+                </div>
+                <div className="docs-card">
+                  <h3>2. SET YOUR HOURLY WAGE</h3>
+                  <p>
+                    Click <strong>SET_RATE</strong> to input your hourly wage.
+                    This enables the "Hours Impact" calculation, showing how
+                    many hours of work your net expenses represent.
+                  </p>
+                </div>
+                <div className="docs-card">
+                  <h3>3. LOG TRANSACTIONS</h3>
+                  <p>
+                    Use <strong>+ INJECT INCOME</strong> for money coming in and
+                    <strong> - EJECT EXPENSE</strong> for money going out. All
+                    transactions are saved to your account and synced to the
+                    cloud.
+                  </p>
+                </div>
+              </section>
+
+              <section className="docs-section">
+                <h2>[ DASHBOARD METRICS ]</h2>
+
+                <div className="docs-grid">
+                  <div className="docs-metric">
+                    <div className="docs-metric-title">TOTAL IN</div>
+                    <p>Sum of all income transactions</p>
+                  </div>
+                  <div className="docs-metric">
+                    <div className="docs-metric-title">TOTAL OUT</div>
+                    <p>Sum of all expense transactions</p>
+                  </div>
+                  <div className="docs-metric">
+                    <div className="docs-metric-title">NET</div>
+                    <p>Balance = Income - Expenses</p>
+                  </div>
+                </div>
+
+                <div className="docs-card">
+                  <h3>EST. RUNWAY</h3>
+                  <p>
+                    Estimated days your current balance will last based on your
+                    monthly budget divided by 30 days. Shows <strong>∞</strong>{" "}
+                    if no budget is set.
+                  </p>
+                  <ul>
+                    <li>
+                      <span className="tag tag-inc">GREEN</span> — More than 30
+                      days
+                    </li>
+                    <li>
+                      <span className="tag" style={{ background: "#FFDE59" }}>
+                        YELLOW
+                      </span>{" "}
+                      — 7-30 days
+                    </li>
+                    <li>
+                      <span className="tag tag-exp">RED</span> — Less than 7
+                      days
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="docs-card">
+                  <h3>HOURS IMPACT</h3>
+                  <p>
+                    Shows the net "life cost" of your finances in work hours.
+                    Negative values (green background) mean you've earned more
+                    than spent. Positive values mean you've spent more than
+                    earned.
+                  </p>
+                </div>
+              </section>
+
+              <section className="docs-section">
+                <h2>[ LIMIT_FLUX GRAPH ]</h2>
+                <p>Visualizes your financial activity over time:</p>
+                <div className="docs-legend">
+                  <div className="docs-legend-item">
+                    <div
+                      className="dot"
+                      style={{ background: "var(--c-success)" }}
+                    ></div>
+                    <span>Income cumulative total</span>
+                  </div>
+                  <div className="docs-legend-item">
+                    <div
+                      className="dot"
+                      style={{ background: "var(--c-secondary)" }}
+                    ></div>
+                    <span>Expense cumulative total</span>
+                  </div>
+                  <div className="docs-legend-item">
+                    <div
+                      className="dot"
+                      style={{ background: "var(--c-primary)" }}
+                    ></div>
+                    <span>Budget cap line</span>
+                  </div>
+                </div>
+              </section>
+
+              <section className="docs-section">
+                <h2>[ DATA STORAGE ]</h2>
+                <p>
+                  When logged in, all your data is securely stored in the cloud.
+                  Your password is hashed with bcrypt using a unique salt. JWT
+                  tokens are used for authentication with 7-day expiry.
+                </p>
+                <p>
+                  When not logged in, data is stored locally in your browser's
+                  localStorage.
+                </p>
+              </section>
+
+              <section className="docs-section">
+                <h2>[ KEYBOARD SHORTCUTS ]</h2>
+                <div className="docs-card">
+                  <p>
+                    Press <code>Enter</code> in any modal input field to submit
+                    the form.
+                  </p>
+                </div>
+              </section>
+
+              <footer className="docs-footer">
+                <p>NEO-BRUTAL TRACKER v4.4 // LIMIT_FLUX</p>
+                <p style={{ opacity: 0.6, marginTop: "10px" }}>
+                  Built with React + Express + MongoDB
+                </p>
+              </footer>
+            </div>
+          </div>
+        );
+      }
+
+      // --- APP & MOUNT ---
+      // --- APP ---
+      function TrackerApp({ onOpenDocs }) {
+        const { logout, user } = useAuth();
+        const { syncing, clearData } = useTracker();
+        const [modals, setModals] = useState({
+          budget: false,
+          wage: false,
+          income: false,
+          expense: false,
+        });
+
+        const openModal = (type) => {
+          setModals((prev) => ({ ...prev, [type]: true }));
+        };
+
+        const closeModal = (type) => {
+          setModals((prev) => ({ ...prev, [type]: false }));
+        };
+
+        const handleLogout = () => {
+          clearData();
+          logout();
+        };
+
+        return (
+          <>
+            <header>
+              <div className="brand">EXPENSE_TERMINAL</div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "15px" }}
+              >
+                {syncing && (
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      background: "var(--c-accent)",
+                      padding: "3px 8px",
+                      border: "2px solid black",
+                    }}
+                  >
+                    SYNCING...
+                  </span>
+                )}
+                <button onClick={onOpenDocs} className="nav-btn">
+                  DOCS
+                </button>
+                <span style={{ fontSize: "0.8rem", fontWeight: "bold" }}>
+                  {user?.email?.toUpperCase() || "USER"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="nav-btn nav-btn-logout"
+                >
+                  LOGOUT
+                </button>
+              </div>
+            </header>
+
+            <div className="container">
+              <CommandPanel
+                onOpenBudget={() => openModal("budget")}
+                onOpenWage={() => openModal("wage")}
+                onOpenIncome={() => openModal("income")}
+                onOpenExpense={() => openModal("expense")}
+              />
+
+              <section>
+                <StatsGrid />
+                <FluxChart />
+                <TransactionLogs />
+                <MetricsPanel />
+              </section>
+            </div>
+
+            {/* Modals */}
+            <BudgetModal
+              isOpen={modals.budget}
+              onClose={() => closeModal("budget")}
+            />
+            <WageModal
+              isOpen={modals.wage}
+              onClose={() => closeModal("wage")}
+            />
+            <TransactionModal
+              isOpen={modals.income}
+              onClose={() => closeModal("income")}
+              type="income"
+            />
+            <TransactionModal
+              isOpen={modals.expense}
+              onClose={() => closeModal("expense")}
+              type="expense"
+            />
+          </>
+        );
+      }
+
+      function AuthenticatedApp() {
+        const { isAuthenticated, loading } = useAuth();
+        const [authMode, setAuthMode] = useState("login");
+        const [currentPage, setCurrentPage] = useState("app");
+
+        if (loading) {
+          return (
+            <div className="auth-container">
+              <div className="auth-card" style={{ textAlign: "center" }}>
+                <div className="brand">EXPENSE_TERMINAL</div>
+                <div style={{ marginTop: "30px", fontWeight: "bold" }}>
+                  LOADING SYSTEM...
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Show docs page (accessible without auth too)
+        if (currentPage === "docs") {
+          return <DocsPage onBack={() => setCurrentPage("app")} />;
+        }
+
+        if (!isAuthenticated) {
+          if (authMode === "login") {
+            return (
+              <LoginPage
+                onSwitchToRegister={() => setAuthMode("register")}
+                onOpenDocs={() => setCurrentPage("docs")}
+              />
+            );
+          }
+          return (
+            <RegisterPage
+              onSwitchToLogin={() => setAuthMode("login")}
+              onOpenDocs={() => setCurrentPage("docs")}
+            />
+          );
+        }
+
+        return (
+          <TrackerProvider>
+            <TrackerApp onOpenDocs={() => setCurrentPage("docs")} />
+          </TrackerProvider>
+        );
+      }
+
+      function App() {
+        return (
+          <AuthProvider>
+            <AuthenticatedApp />
+          </AuthProvider>
+        );
+      }
+
+      // --- MOUNT ---
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>

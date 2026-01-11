@@ -438,23 +438,136 @@ td {
 }
 
 /* --- RESPONSIVE --- */
-@media (max-width: 600px) {
-  body {
-    padding: 20px;
-  }
-
-  .stats-grid {
+/* --- RESPONSIVE / MOBILE DESIGN --- */
+@media (max-width: 900px) {
+  .container {
     grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Layout Adjustments */
+  body {
+    padding: 15px;
+    background-size: 16px 16px;
   }
 
+  .container {
+    gap: 20px;
+  }
+
+  /* Header Optimization */
   header {
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     text-align: center;
+    padding: 15px;
+    transform: rotate(0deg); /* Reset rotation for cleaner mobile view */
+    margin-bottom: 25px;
   }
 
   .brand {
+    font-size: 1.4rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  header > div {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px !important;
+  }
+
+  /* Command Grid & Buttons */
+  .command-grid {
+    gap: 15px;
+  }
+
+  .action-btn-large {
+    height: 80px;
+    font-size: 1.2rem;
+  }
+
+  .action-btn-large span {
+    font-size: 0.7rem;
+  }
+
+  .brutal-card {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-box {
+    padding: 10px;
+  }
+
+  .stat-val {
+    font-size: 1.2rem;
+  }
+
+  /* Runway & Life Components */
+  .runway-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .runway-val {
+    font-size: 2rem;
+  }
+
+  /* Table Adjustments */
+  th,
+  td {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .tag {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+  }
+
+  /* Modals */
+  .modal-box {
+    width: 95%;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .close-modal {
+    top: -15px;
+    right: -10px;
+    width: 35px;
+    height: 35px;
+  }
+
+  /* Auth Pages */
+  .auth-card {
+    padding: 25px;
+  }
+
+  .auth-title {
     font-size: 1.5rem;
+  }
+}
+
+/* Small Landscape & Foldable support */
+@media (max-width: 400px) {
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
   }
 }
 

@@ -13,6 +13,7 @@ import TransactionModal from "./components/TransactionModal";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import DocsPage from "./components/DocsPage";
+import IntroPage from "./components/IntroPage";
 
 function TrackerApp({ onOpenDocs }) {
   const { logout, user } = useAuth();
@@ -104,7 +105,7 @@ function TrackerApp({ onOpenDocs }) {
 
 function AuthenticatedApp() {
   const { isAuthenticated, loading } = useAuth();
-  const [authMode, setAuthMode] = useState("login");
+  const [authMode, setAuthMode] = useState("intro");
   const [currentPage, setCurrentPage] = useState("app");
 
   if (loading) {
@@ -126,6 +127,9 @@ function AuthenticatedApp() {
   }
 
   if (!isAuthenticated) {
+    if (authMode === "intro") {
+      return <IntroPage onComplete={() => setAuthMode("login")} />;
+    }
     if (authMode === "login") {
       return (
         <LoginPage

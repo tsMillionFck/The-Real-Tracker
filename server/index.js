@@ -25,23 +25,36 @@ const allowedOrigins = [
   "https://the-real-tracker-psi.vercel.app",
 ];
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log(
+    `[CORS Debug] Request from origin: ${origin} | Method: ${req.method} | Path: ${req.path}`
+  );
+  next();
+});
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
+
+      const isAllowed =
+        allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app");
+
+      if (isAllowed) {
         callback(null, true);
       } else {
-        console.log(`CORS blocked for origin: ${origin}`);
+        console.log(`[CORS Blocked] Origin not in allowed list: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200,
   })
 );
+
+// Explicitly handle pre-flight for all routes
+app.options("*", cors());
 app.use(express.json());
 
 // Routes
@@ -71,6 +84,12 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });
+});
+
+// Catch-all route for debugging
+app.use((req, res) => {
+  console.log(`[404 Debug] Unhandled request: ${req.method} ${req.path}`);
+  res.status(404).json({ error: "Route not found" });
 });
 
 export default app;
